@@ -8,8 +8,7 @@ EXPOSE 5001
 RUN git clone https://github.com/drorle/ping-pong.git ;\
     cd ping-pong ;\
     pip install -r requirements.txt ;\
-    cd ping 
 
 # Run the application
-WORKDIR /ping-pong/ping
-CMD python ping.py
+WORKDIR /ping-pong
+CMD python pingpong.py
