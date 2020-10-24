@@ -3,10 +3,10 @@ FROM python:alpine
 
 # Install git
 RUN apk add --no-cache git
-EXPOSE 5001
+EXPOSE 5000
 # Copy repo and install dependencies
 RUN git clone https://github.com/drorle/ping-pong.git ;\
-    cd ping-pong ;\
+    cd /ping-pong ;\
     pip install -r requirements.txt 
 
 # Run the application
