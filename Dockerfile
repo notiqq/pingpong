@@ -1,13 +1,13 @@
-# using a python small basic image
+# Using a python small basic image
 FROM python:alpine
-# exposing our app port in docker internal network
+
+# Install git
+RUN apk add --no-cache git
 EXPOSE 5000
-# creates a dir for our application
-WORKDIR /app
-# copy our requirements.txt file and install dependencies
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-# copy the rest of our application
-COPY . .
-# run the application
+# Copy repo and install dependencies
+RUN git clone https://github.com/drorle/ping-pong.git ;\
+    cd ping-pong ;\
+    pip install -r requirements.txt
+# Run the application
+WORKDIR /ping-pong
 CMD python app.py
