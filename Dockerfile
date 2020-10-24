@@ -7,7 +7,7 @@ EXPOSE 5001
 # Copy repo and install dependencies
 RUN git clone https://github.com/drorle/ping-pong.git ;\
     cd ping-pong ;\
-    pip install -r requirements.txt ;\
+    pip install -r requirements.txt 
 
 # Run the application
 WORKDIR /ping-pong
