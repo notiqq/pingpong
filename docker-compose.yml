@@ -1,6 +1,10 @@
-version: '3.7'
+version: '3.8'
 services:
-    app:
-        build: app
+    ping:
+        build: . 
         ports:
-            - 80:80
+            - 5000:5000
+    pong:
+        build: . 
+        ports:
+            - 5001:5000
