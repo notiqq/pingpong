@@ -14,3 +14,5 @@ services:
             dockerfile: Dockerfile.local
         ports:
             - 5001:5000
+    redis:
+        image: "redis:alpine"
