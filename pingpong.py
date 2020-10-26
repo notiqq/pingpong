@@ -20,21 +20,30 @@ def ping(*args):
     iteration = int(request.args.get('iteration') or args[0])
     iterations = int(request.args.get('iterations') or args[1])
 
-    #print ('This is count number ',ping_count, file=sys.stderr)
-    #response = requests.get('http://pong:5001/ping').content
-    #print (response, file=sys.stderr)
     iteration += 1
     if iteration <= int(iterations) :
         print ('iteration <- iterations', file=sys.stderr)
-       # response = requests.get('http://pong:5001/pong').content
-    print ('iteration=',iteration, file=sys.stderr)
-    print ('iterations=',iterations, file=sys.stderr)
+        payload = {'iteration': iteration, 'iterations': iterations}
+        r = requests.get('http://pong:5000/pong', params=payload)
+        print(r.content, file=sys.stderr)
+        print ('iteration=',iteration, file=sys.stderr)
+        print ('iterations=',iterations, file=sys.stderr)
+    #exit()
     return 'pong', 200
 
 @app.route('/pong')
-def pong():
+def pong(*args):
+    iteration = int(request.args.get('iteration') or args[0])
+    iterations = int(request.args.get('iterations') or args[1])
+    iteration += 1
+    if iteration <= int(iterations) :
+        print ('iteration <- iterations', file=sys.stderr)
+        payload = {'iteration': iteration, 'iterations': iterations}
+        r = requests.get('http://pong:5000/pong', params=payload)
+        print(r.content, file=sys.stderr)
+        print ('iteration=',iteration, file=sys.stderr)
+        print ('iterations=',iterations, file=sys.stderr)
 #    response = requests.get('http://ping:5000/pong').content
-    print ('Hello world', file=sys.stderr)
     return 'ping', 200
     
 def finalize():
