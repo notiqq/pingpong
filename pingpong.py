@@ -1,47 +1,44 @@
-import redis
 import requests
 import sys
 import time
 from flask import Flask
+from flask import request
 
 app = Flask(__name__)
-cache = redis.Redis(host='redis', port=6379)
+#cache = redis.Redis(host='redis', port=6379)
 
 @app.route('/pingpong')
 def pingpong():
-    cache.mset({"hits": "0"})
-    ping()
+    iterations = request.args.get('iterations')
+#    response = requests.get('http://pong:5001/pong').content
+#    return response, 200
+    ping(0,iterations)
     return 'pingpong', 200
 
 @app.route('/ping')
-def ping():
-    ping_count = cache.incr('hits')
-    print ('This is count number ',ping_count, file=sys.stderr)
-    if ping_count == 5:
-        exit()
-    response = requests.get('http://ping:5000/pong').content
+def ping(*args):
+    iteration = int(request.args.get('iteration') or args[0])
+    iterations = int(request.args.get('iterations') or args[1])
+
+    #print ('This is count number ',ping_count, file=sys.stderr)
+    #response = requests.get('http://pong:5001/ping').content
+    #print (response, file=sys.stderr)
+    iteration += 1
+    if iteration <= int(iterations) :
+        print ('iteration <- iterations', file=sys.stderr)
+       # response = requests.get('http://pong:5001/pong').content
+    print ('iteration=',iteration, file=sys.stderr)
+    print ('iterations=',iterations, file=sys.stderr)
     return 'pong', 200
 
 @app.route('/pong')
 def pong():
-    #response = requests.get('http://pong:5001/ping').content
+#    response = requests.get('http://ping:5000/pong').content
+    print ('Hello world', file=sys.stderr)
     return 'ping', 200
-
-def get_ping_count():
-    limit = 5
-    while True:
-        try:
-            return cache.incr('hits')
-        except redis.exceptions.ConnectionError as exc:
-            if limit == 0:
-                raise exc
-            limit -= 1
-            time.sleep(0.5)
-
-#def run_x_times():
-#    for i in range (6):
-#       print('Iteration number ', i, file=sys.stderr)
-#       ping()
     
+def finalize():
+    print ('Exiting', file=sys.stderr)
+
 if __name__ == '__main__':
     app.run('0.0.0.0', debug=True)
