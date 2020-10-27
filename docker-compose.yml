@@ -3,13 +3,13 @@ services:
     ping:
         build: 
             context: .  
-            dockerfile: Dockerfile.local
+            dockerfile: Dockerfile
         ports:
             - 5000:5000
     pong:
         build:  
             context: .  
-            dockerfile: Dockerfile.local
+            dockerfile: Dockerfile
         ports:
             - 5001:5000
     #redis:
