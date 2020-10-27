@@ -11,4 +11,4 @@ RUN git clone https://github.com/drorle/ping-pong.git ;\
 
 # Run the application
 WORKDIR /ping-pong
-CMD python pingpong.py
+CMD python -u pingpong.py

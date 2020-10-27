@@ -10,9 +10,12 @@ app = Flask(__name__)
 @app.route('/pingpong')
 def pingpong():
     iterations = request.args.get('iterations')
-#    response = requests.get('http://pong:5001/pong').content
-#    return response, 200
+    start_time = int(round(time.time() * 1000))
     ping(0,iterations)
+    end_time = int(round(time.time() * 1000))
+    run_time = end_time - start_time
+    print (end_time, " Game Over, took ",run_time," ms", file=sys.stderr)
+    print (end_time, " Game Over, took ",run_time," ms", file=sys.stdout)
     return 'pingpong', 200
 
 @app.route('/ping')
@@ -22,14 +25,11 @@ def ping(*args):
 
     iteration += 1
     if iteration <= int(iterations) :
-        print ('iteration <- iterations', file=sys.stderr)
         payload = {'iteration': iteration, 'iterations': iterations}
+        print (int(round(time.time() * 1000))," ping ",iteration, file=sys.stderr)
+        print (int(round(time.time() * 1000))," ping ",iteration, file=sys.stdout)
         r = requests.get('http://pong:5000/pong', params=payload)
-        print(r.content, file=sys.stderr)
-        print ('iteration=',iteration, file=sys.stderr)
-        print ('iterations=',iterations, file=sys.stderr)
-    #exit()
-    return 'pong', 200
+    return 'ping', 200
 
 @app.route('/pong')
 def pong(*args):
@@ -37,17 +37,11 @@ def pong(*args):
     iterations = int(request.args.get('iterations') or args[1])
     iteration += 1
     if iteration <= int(iterations) :
-        print ('iteration <- iterations', file=sys.stderr)
         payload = {'iteration': iteration, 'iterations': iterations}
-        r = requests.get('http://pong:5000/pong', params=payload)
-        print(r.content, file=sys.stderr)
-        print ('iteration=',iteration, file=sys.stderr)
-        print ('iterations=',iterations, file=sys.stderr)
-#    response = requests.get('http://ping:5000/pong').content
-    return 'ping', 200
+        print (int(round(time.time() * 1000))," pong ",iteration, file=sys.stderr)
+        print (int(round(time.time() * 1000))," pong ",iteration, file=sys.stdout)
+        r = requests.get('http://ping:5000/ping', params=payload)
+    return 'pong', 200
     
-def finalize():
-    print ('Exiting', file=sys.stderr)
-
 if __name__ == '__main__':
     app.run('0.0.0.0', debug=True)
