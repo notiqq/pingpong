@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 services:
     ping:
         build: 
@@ -12,5 +12,3 @@ services:
             dockerfile: Dockerfile
         ports:
             - 5001:5000
-    #redis:
-    #    image: "redis:alpine"
