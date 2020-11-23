@@ -1,11 +1,18 @@
-# Using a python small basic image
 FROM python:alpine
-RUN apk update && apk bash build-base python3-dev libffi-dev
 
+RUN apt-get update -y && \
+    apt-get install -y python-pip python-dev
 
 EXPOSE 5000
-RUN  pip install -r requirements.txt
 
-# Run the application
+RUN pip install -r requirements.txt 
+
 WORKDIR /ping-pong
-CMD python -u master.py
+
+CMD python -u pingpong.py
+
+COPY . /ping-pong
+
+ENTRYPOINT [ "python" ]
+
+CMD [ "app.py" ]
