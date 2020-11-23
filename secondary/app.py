@@ -3,20 +3,21 @@ import sys
 import time
 from flask import Flask
 from flask import request
+from flask import jsonify, make_response
 
 app = Flask(__name__)
 
-@app.route('/pong')
-def pong(*args):
-    iteration = int(request.args.get('iteration') or args[0])
-    iterations = int(request.args.get('iterations') or args[1])
-    iteration += 1
-    if iteration <= int(iterations):
-        payload = {'iteration': iteration, 'iterations': iterations }
-        print(int(round(time.time()*1000)), " pong ", iteration, file = sys.stderr)
-        print(int(round(time.time()*1000)), " pong ", iteration, file = sys.stdout)
-        r1 = requests.get('http://ping:5000/ping', params = payload)
-    return 'pong', 200
+@app.route('/', methods = ['POST'])
+def respond():
+    d = requests.get('http://localhost:5000')
+    if d:
+        return make_response(jsonify(d), 200)
+
+@app.route('/', methods = ['GET'])
+def GET(*args):
+    r = requests.get('http://localhost:5000')
+    print(r)
+    return 'request returned', 200
 
 
 if __name__ == '__main__':
