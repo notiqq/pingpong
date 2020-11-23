@@ -1,14 +1,18 @@
-# Using a python small basic image
 FROM python:alpine
 
-# Install git
-RUN apk add --no-cache git
-EXPOSE 5000
-# Copy repo and install dependencies
-RUN git clone https://github.com/drorle/ping-pong.git ;\
-    cd /ping-pong ;\
-    pip install -r requirements.txt 
+RUN apt-get update -y && \
+    apt-get install -y python-pip python-dev
 
-# Run the application
+EXPOSE 5000
+
+RUN pip install -r requirements.txt 
+
 WORKDIR /ping-pong
+
 CMD python -u pingpong.py
+
+COPY . /ping-pong
+
+ENTRYPOINT [ "python" ]
+
+CMD [ "app.py" ]
