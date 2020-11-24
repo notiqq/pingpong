@@ -1,18 +1,22 @@
-FROM python:alpine
+# base image
+FROM python:3.8.1-slim
 
-RUN apt-get update -y && \
-    apt-get install -y python-pip python-dev
+# install netcat
+RUN apt-get update && \
+    apt-get -y install netcat && \
+    apt-get clean
 
 EXPOSE 5000
+# set working directory
+WORKDIR /usr/src/app
 
-RUN pip install -r requirements.txt 
+# add and install requirements
+COPY ./requirements.txt /usr/src/app/requirements.txt
+RUN pip install -r requirements.txt
 
-WORKDIR /ping-pong
+# add app
+COPY . /usr/src/app
 
-CMD python -u pingpong.py
-
-COPY . /ping-pong
-
-ENTRYPOINT [ "python" ]
-
-CMD [ "app.py" ]
+ENTRYPOINT ["python"]
+# run server
+CMD ["/usr/src/app/app.py"]

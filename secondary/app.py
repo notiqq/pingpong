@@ -1,24 +1,62 @@
 import requests
 import sys
 import time
-from flask import Flask
+from flask import Flask, redirect
 from flask import request
 from flask import jsonify, make_response
+import json
+import os as os
+
 
 app = Flask(__name__)
-
-@app.route('/', methods = ['POST'])
-def respond():
-    d = requests.get('http://localhost:5000')
-    if d:
-        return make_response(jsonify(d), 200)
-
-@app.route('/', methods = ['GET'])
-def GET(*args):
-    r = requests.get('http://localhost:5000')
-    print(r)
-    return 'request returned', 200
+STORAGE_NAME = "data.json"
 
 
-if __name__ == '__main__':
-    app.run('0.0.0.0', debug = True)
+def get_messages():
+    data = []
+    if not os.path.exists(STORAGE_NAME):
+        with open(STORAGE_NAME, "w"):
+            pass
+    with open(STORAGE_NAME, "r+") as openfile:
+        try:
+            data = json.load(openfile)
+        except:
+            data = []
+    return data
+
+
+def save_messages(data):
+    with open(STORAGE_NAME, "w") as outfile:
+        json.dump(data, outfile)
+
+
+def add_message(message):
+    messages = get_messages()
+    messages.append(message)
+    save_messages(messages)
+    return messages
+
+
+@app.route("/", methods=["GET"])
+def save_data():
+    message = request.args.get("message")
+    if message == None:
+        return redirect("all", code=303)
+    add_message(message)
+    return jsonify(get_messages(), 200)
+
+
+@app.route("/all", methods=["GET"])
+def get_saved_data():
+    return jsonify(get_messages(), 200)
+
+
+@app.route("/clear", methods=["GET"])
+def clear_data():
+    save_messages([])
+    return redirect("all", code=303)
+
+
+if __name__ == "__main__":
+    port = 5000 if "PORT" not in os.environ else os.environ["PORT"]
+    app.run("0.0.0.0", port, debug=True)
