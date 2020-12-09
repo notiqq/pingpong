@@ -4,6 +4,9 @@ import time
 import configs as config
 import json
 import os as os
+import asyncio
+import aiohttp
+
 from flask import Flask, session, redirect
 from flask import request
 from flask import jsonify
@@ -38,31 +41,6 @@ def add_message(message):
     return messages
 
 
-@app.route("/", methods=["POST", "GET"])
-def submit_to_secondaries():
-    message = None
-    if request.method == "POST":
-        message = request.form["message"]
-    if request.method == "GET":
-        message = request.args.get("message")
-    if message == None:
-        return redirect("all", code=303)
-    try:
-        try:
-            requests.get(f"{config.first_node_url}?message={message}")
-        except Exception as ex:
-            add_message(str(ex))
-        try:
-            requests.get(f"{config.second_node_url}?message={message}")
-        except Exception as ex:
-            add_message(str(ex))
-        add_message(message)
-    except Exception as ex:
-        return (ex, 500)
-
-    return redirect("all", code=303)
-
-
 @app.route("/all", methods=["GET"])
 def get_submitted_data():
     data = get_messages()
@@ -82,6 +60,51 @@ def clear_data():
     except:
         pass
     return redirect("all", code=303)
+
+
+@app.route("/", methods=["POST", "GET"])
+def submit_to_secondaries():
+    async def make_request(session, host, message):
+        url = f"{host}?message={message}"
+        async with session.get(url) as response:
+            print("Read {0} from {1}".format(response.content_length, url))
+
+    async def process_requests(w, message):
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            while w > 0:
+                if w % 2 == 0:
+                    tasks.append(
+                        asyncio.ensure_future(
+                            make_request(session, config.first_node_url, message)
+                        )
+                    )
+                else:
+                    tasks.append(
+                        asyncio.ensure_future(
+                            make_request(session, config.second_node_url, message)
+                        )
+                    )
+                w = w - 1
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    message = None
+    w = 0
+    if request.method == "POST":
+        message = request.form["message"]
+        w = int(request.form["w"] if request.form["w"] != None else 0)
+    if request.method == "GET":
+        message = request.args.get("message")
+        w = int(request.args.get("w") if request.args.get("w") != None else 0)
+    if message == None:
+        return redirect("all", code=303)
+
+    add_message(message)
+
+    asyncio.set_event_loop(asyncio.SelectorEventLoop())
+    asyncio.get_event_loop().run_until_complete(process_requests(w, message))
+
+    return jsonify({"status": f"Processed {message}"})
 
 
 if __name__ == "__main__":

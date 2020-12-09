@@ -6,7 +6,7 @@ from flask import request
 from flask import jsonify, make_response
 import json
 import os as os
-
+import time
 
 app = Flask(__name__)
 STORAGE_NAME = "data.json"
@@ -39,6 +39,9 @@ def add_message(message):
 
 @app.route("/", methods=["GET"])
 def save_data():
+    delay = int(0 if "DELAY" not in os.environ else os.environ["DELAY"])
+    time.sleep(delay)
+
     message = request.args.get("message")
     if message == None:
         return redirect("all", code=303)

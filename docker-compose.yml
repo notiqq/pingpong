@@ -16,6 +16,7 @@ services:
             - 5001:5001
         environment:
             - PORT=5001
+            - DELAY=3 #seconds
     second_node:
         build:  
             context: ./secondary  
