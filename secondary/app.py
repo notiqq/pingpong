@@ -7,11 +7,13 @@ from flask import jsonify, make_response
 import json
 import os as os
 import time
+
 from datetime import datetime
 from data_access import DataProvider
 from models import Message
 from helpers import Helper
-from configs import master_node_url
+from configs import master_node_url, base_url
+
 
 app = Flask(__name__)
 
@@ -54,21 +56,32 @@ def clear_data():
 def notify_master(port):
     requests.get(master_node_url + f"/notify?port={port}")
 
+def try_port(port):
+    result = False
+    try:
+        url = f"{base_url}:{port}"
+        requests.get(url)
+        print(f"{port} port is in use")
+    except:
+        result = True
+    return result
 
 if __name__ == "__main__":
-    port = 5000
+    init_port = 5000
     if "PORT" not in os.environ:
-        for port in range(5001, 5002):
-            try:
-                app.run("0.0.0.0", port, debug=True)
-                break
-            except:
-                pass
+        port_found = False
+        while port_found == False:
+            init_port += 1
+            result = try_port(init_port)
+            if result != True:
+                continue
+            app.run("0.0.0.0", init_port, debug=True)
+            break
     else:
         port = os.environ["PORT"]
         app.run("0.0.0.0", port, debug=True)
     
     try:
-        notify_master(port)
+        notify_master(init_port)
     except:
         pass

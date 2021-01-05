@@ -1,5 +1,11 @@
 import os as os
 import json
+from marshmallow import Schema, fields
+
+class StatusSchema(Schema):
+    url = fields.Str()
+    status = fields.Str()
+
 
 
 class DataProvider:
@@ -19,11 +25,14 @@ class DataProvider:
             except:
                 data = []
         return data
-        
+
     @staticmethod
     def save_health_statuses(data):
-        with open(DataProvider.STORAGE_NAME, "w") as outfile:
-            json.dump(data, outfile)
+        status_schema = StatusSchema()
+        json_string = status_schema.dumps(data, many=True)
+
+        with open(DataProvider.HEALTHY_DATA_STORAGE_NAME, "w") as outfile:
+            json.dump(json_string, outfile)
 
     @staticmethod
     def get_messages():

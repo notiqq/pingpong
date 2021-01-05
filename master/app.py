@@ -96,7 +96,7 @@ def submit_to_secondaries():
         if node.status == NodeStatus.Healthy:
             nodes_counter += 1
     if nodes_counter == 0:
-        return redirect("all", code=303)
+        return "master is read-only"
 
     DataProvider.add_message(message)
 
@@ -146,13 +146,13 @@ def notify():
         node = Node(node_url, NodeStatus.Healthy)
         data.append(node)
     DataProvider.save_health_statuses(data)
-
+    print(node_url, " ------ ", str(NodeStatus.Healthy))
     return ('', 200)
       
 
 if __name__ == "__main__":
     process_value = Value('b', True)
-    background_process = Process(target=health_check, args=(process_value,))
+    background_process = Process(target=health_check)
     background_process.start()  
     app.run(debug=True, host="0.0.0.0", use_reloader=False)
     background_process.join()
