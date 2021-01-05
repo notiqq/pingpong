@@ -7,34 +7,11 @@ from flask import jsonify, make_response
 import json
 import os as os
 import time
+from data_access import DataProvider
+from models import Message
+from helpers import Helper
 
 app = Flask(__name__)
-STORAGE_NAME = "data.json"
-
-
-def get_messages():
-    data = []
-    if not os.path.exists(STORAGE_NAME):
-        with open(STORAGE_NAME, "w"):
-            pass
-    with open(STORAGE_NAME, "r+") as openfile:
-        try:
-            data = json.load(openfile)
-        except:
-            data = []
-    return data
-
-
-def save_messages(data):
-    with open(STORAGE_NAME, "w") as outfile:
-        json.dump(data, outfile)
-
-
-def add_message(message):
-    messages = get_messages()
-    messages.append(message)
-    save_messages(messages)
-    return messages
 
 
 @app.route("/", methods=["GET"])
@@ -42,21 +19,30 @@ def save_data():
     delay = int(0 if "DELAY" not in os.environ else os.environ["DELAY"])
     time.sleep(delay)
 
-    message = request.args.get("message")
-    if message == None:
-        return redirect("all", code=303)
-    add_message(message)
-    return jsonify(get_messages(), 200)
+    text = request.args.get("message")
+    uuid = request.args.get("message_id")
+    stamp = request.args.get("stamp")
 
+    if text == None or uuid == None or stamp == None:
+        return redirect("all", code=303)
+    stamp = Helper.decode_base64(stamp)
+    message = Message(text, uuid, stamp)
+    DataProvider.add_message(message)
+    return jsonify(DataProvider.get_messages(), 200)
+
+
+@app.route("/health-check", methods=["GET"])
+def get_health_check_data():
+    return ('', 200)
 
 @app.route("/all", methods=["GET"])
 def get_saved_data():
-    return jsonify(get_messages(), 200)
+    return jsonify(DataProvider.get_messages(), 200)
 
 
 @app.route("/clear", methods=["GET"])
 def clear_data():
-    save_messages([])
+    DataProvider.save_messages({})
     return redirect("all", code=303)
 
 
