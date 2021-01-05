@@ -7,6 +7,7 @@ from flask import jsonify, make_response
 import json
 import os as os
 import time
+from datetime import datetime
 from data_access import DataProvider
 from models import Message
 from helpers import Helper
@@ -25,7 +26,7 @@ def save_data():
 
     if text == None or uuid == None or stamp == None:
         return redirect("all", code=303)
-    stamp = Helper.decode_base64(stamp)
+    stamp = datetime(Helper.decode_base64(stamp))
     message = Message(text, uuid, stamp)
     DataProvider.add_message(message)
     return jsonify(DataProvider.get_messages(), 200)
@@ -37,7 +38,9 @@ def get_health_check_data():
 
 @app.route("/all", methods=["GET"])
 def get_saved_data():
-    return jsonify(DataProvider.get_messages(), 200)
+    data = DataProvider.get_messages()
+    sorted_data = sorted(data,key=lambda x: x.stamp, reverse=True)
+    return jsonify(sorted_data, 200)
 
 
 @app.route("/clear", methods=["GET"])
