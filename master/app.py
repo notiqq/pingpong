@@ -131,6 +131,23 @@ def health_check():
             
         DataProvider.save_health_statuses(nodes)
         time.sleep(check_period)
+
+@app.route("/notify", methods=["GET"])
+def notify():
+    port = request.args.get("port")
+    data = DataProvider.get_health_statuses()
+    node_url = config.base_url + ":" + port
+
+    if any(node.url == node_url for node in data):
+        for node in data:
+            if node.url == node_url:
+                node.status = NodeStatus.Healthy
+    else:
+        node = Node(node_url, NodeStatus.Healthy)
+        data.append(node)
+    DataProvider.save_health_statuses(data)
+
+    return ('', 200)
       
 
 if __name__ == "__main__":
