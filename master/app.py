@@ -151,8 +151,8 @@ def notify():
       
 
 if __name__ == "__main__":
-    recording_on = Value('b', True)
-    background_process = Process(target=health_check, args=(recording_on,))
+    process_value = Value('b', True)
+    background_process = Process(target=health_check, args=(process_value,))
     background_process.start()  
     app.run(debug=True, host="0.0.0.0", use_reloader=False)
     background_process.join()
