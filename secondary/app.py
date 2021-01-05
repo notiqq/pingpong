@@ -11,6 +11,7 @@ from datetime import datetime
 from data_access import DataProvider
 from models import Message
 from helpers import Helper
+from configs import master_node_url
 
 app = Flask(__name__)
 
@@ -49,6 +50,11 @@ def clear_data():
     return redirect("all", code=303)
 
 
+
+def notify_master(port):
+    requests.get(master_node_url + f"/notify?port={port}")
+
+
 if __name__ == "__main__":
     port = 5000
     if "PORT" not in os.environ:
@@ -61,3 +67,8 @@ if __name__ == "__main__":
     else:
         port = os.environ["PORT"]
         app.run("0.0.0.0", port, debug=True)
+    
+    try:
+        notify_master(port)
+    except:
+        pass

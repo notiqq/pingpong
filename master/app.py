@@ -65,23 +65,17 @@ def submit_to_secondaries():
                 if current_retry_period < max_retry_period:
                     current_retry_period += retry_period_step
 
-    async def process_requests(w, message):
+    async def process_requests(w, message, nodes):
         async with aiohttp.ClientSession() as session:
             tasks = []
-            while w > 0:
-                if w % 2 == 0:
-                    tasks.append(
+            for node in nodes:
+                if node.status != NodeStatus.Healthy:
+                    continue
+                tasks.append(
                         asyncio.ensure_future(
-                            make_request(session, config.first_node_url, message)
+                            make_request(session, node.url, message)
                         )
                     )
-                else:
-                    tasks.append(
-                        asyncio.ensure_future(
-                            make_request(session, config.second_node_url, message)
-                        )
-                    )
-                w = w - 1
             await asyncio.gather(*tasks, return_exceptions=True)
 
     message = None
@@ -107,7 +101,7 @@ def submit_to_secondaries():
     DataProvider.add_message(message)
 
     asyncio.set_event_loop(asyncio.SelectorEventLoop())
-    asyncio.get_event_loop().run_until_complete(asyncio.wait_for(process_requests(w, message),timeout))
+    asyncio.get_event_loop().run_until_complete(asyncio.wait_for(process_requests(w, message, nodes),timeout))
 
     return jsonify({"status": f"Processed {message}"})
 
