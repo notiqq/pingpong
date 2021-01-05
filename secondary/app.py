@@ -50,5 +50,14 @@ def clear_data():
 
 
 if __name__ == "__main__":
-    port = 5000 if "PORT" not in os.environ else os.environ["PORT"]
-    app.run("0.0.0.0", port, debug=True)
+    port = 5000
+    if "PORT" not in os.environ:
+        for port in range(5001, 5002):
+            try:
+                app.run("0.0.0.0", port, debug=True)
+                break
+            except:
+                pass
+    else:
+        port = os.environ["PORT"]
+        app.run("0.0.0.0", port, debug=True)
