@@ -1,7 +1,14 @@
 import os as os
 import json
+from marshmallow import Schema, fields
+
+class MessageSchema(Schema):
+    message = fields.Str()
+    uuid = fields.Str()
+    stamp = fields.DateTime()
 
 
+#TODO serialization to json via marshmallow
 class DataProvider:
 
     STORAGE_NAME = "data.json"
