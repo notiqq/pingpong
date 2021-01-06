@@ -22,6 +22,10 @@ from models import NodeStatus
 
 app = Flask(__name__)
 
+@app.route("/config", methods=["GET"])
+def get_config_data():
+    data = config.base_url, config.first_node_url, config.second_node_url
+    return jsonify(data)
 
 @app.route("/all", methods=["GET"])
 def get_submitted_data():
@@ -32,6 +36,7 @@ def get_submitted_data():
 @app.route("/clear", methods=["GET"])
 def clear_data():
     DataProvider.save_messages([])
+    DataProvider.save_health_statuses([])
     try:
         requests.get(f"{config.first_node_url}/clear")
     except:
@@ -96,7 +101,10 @@ def submit_to_secondaries():
         if node['status'] == NodeStatus.Healthy:
             nodes_counter += 1
     if nodes_counter == 0:
-        return "master is read-only"
+        response = {}
+        response["text"] = "master is read-only"
+        response["objects"] = nodes
+        return jsonify(response)
 
     DataProvider.add_message(message)
 
@@ -105,8 +113,7 @@ def submit_to_secondaries():
 
     return jsonify({"status": f"Processed {message}"})
 
-def health_check():
-    check_period= 10
+def get_nodes():
     node_urls = [config.first_node_url, config.second_node_url]
     nodes = DataProvider.get_health_statuses()
     if len(nodes) == 0:
@@ -114,8 +121,14 @@ def health_check():
         for node_url in node_urls:
             node = dict(url = node_url, status=NodeStatus.NotDefined)
             nodes.append(node)
+    return nodes
+
+def health_check():
+    check_period= 10
+    nodes = get_nodes()
 
     while True:
+        nodes = get_nodes()
         for node in nodes:
             try:
                 requests.get(node['url'] + "/health-check")

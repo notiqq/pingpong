@@ -51,7 +51,7 @@ def get_saved_data():
 
 @app.route("/clear", methods=["GET"])
 def clear_data():
-    DataProvider.save_messages({})
+    DataProvider.save_messages([])
     return redirect("all", code=303)
 
 
@@ -69,6 +69,14 @@ def try_port(port):
         result = True
     return result
 
+@app.route("/config", methods=["GET"])
+def get_config_data():
+    response = [master_node_url, base_url]
+    if "PORT" in os.environ:
+        response.append(os.environ["PORT"])
+
+    return jsonify(response, 200)
+
 if __name__ == "__main__":
     init_port = 5000
     if "PORT" not in os.environ:
@@ -82,8 +90,8 @@ if __name__ == "__main__":
 
         app.run(debug=True, host="0.0.0.0", port=init_port, use_reloader=False)
     else:
-        port = os.environ["PORT"]
-        app.run(debug=True, host="0.0.0.0", port=port, use_reloader=False)
+        init_port = os.environ["PORT"]
+        app.run(debug=True, host="0.0.0.0", port=init_port, use_reloader=False)
     
     try:
         notify_master(init_port)

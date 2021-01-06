@@ -4,7 +4,8 @@ FROM python:3.8.1-slim
 # install netcat
 RUN apt-get update && \
     apt-get -y install netcat && \
-    apt-get clean
+    apt-get clean \
+    apt-get install curl
 
 EXPOSE 5000
 # set working directory
@@ -19,4 +20,4 @@ COPY . /usr/src/app
 
 ENTRYPOINT ["python"]
 # run server
-CMD ["/usr/src/app/app.py"]
+CMD ["-u","/usr/src/app/app.py"]

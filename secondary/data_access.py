@@ -8,6 +8,10 @@ class DataProvider:
     path = os.path.dirname(os.path.abspath(__file__))
     MESSAGE_STORAGE_PATH = path + "/data.json"
 
+    @staticmethod
+    def delete_messages_file():
+        if os.path.exists(DataProvider.MESSAGE_STORAGE_PATH):
+            os.remove(DataProvider.MESSAGE_STORAGE_PATH)
 
     @staticmethod
     def get_messages():
