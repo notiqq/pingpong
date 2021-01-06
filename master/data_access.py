@@ -10,17 +10,17 @@ class StatusSchema(Schema):
 
 
 class DataProvider:
-
-    STORAGE_NAME = "data.json"
-    HEALTHY_DATA_STORAGE_NAME = "healthy_data.json"
+    path = os.path.dirname(os.path.abspath(__file__))
+    MESSAGE_STORAGE_PATH = path + "/data.json"
+    HEALTHY_DATA_STORAGE_PATH = path + "/healthy_data.json"
 
     @staticmethod
     def get_health_statuses():
         data = []
-        if not os.path.exists(DataProvider.HEALTHY_DATA_STORAGE_NAME):
-            with open(DataProvider.HEALTHY_DATA_STORAGE_NAME, "w"):
+        if not os.path.exists(DataProvider.HEALTHY_DATA_STORAGE_PATH):
+            with open(DataProvider.HEALTHY_DATA_STORAGE_PATH, "w"):
                 pass
-        with open(DataProvider.HEALTHY_DATA_STORAGE_NAME, "r+") as openfile:
+        with open(DataProvider.HEALTHY_DATA_STORAGE_PATH, "r+") as openfile:
             try:
                 data = json.load(openfile)
             except:
@@ -34,16 +34,16 @@ class DataProvider:
         status_schema = StatusSchema()
         json_string = status_schema.dumps(data, many=True)
 
-        with open(DataProvider.HEALTHY_DATA_STORAGE_NAME, "w") as outfile:
+        with open(DataProvider.HEALTHY_DATA_STORAGE_PATH, "w") as outfile:
             json.dump(json_string, outfile)
 
     @staticmethod
     def get_messages():
         data = []
-        if not os.path.exists(DataProvider.STORAGE_NAME):
-            with open(DataProvider.STORAGE_NAME, "w"):
+        if not os.path.exists(DataProvider.MESSAGE_STORAGE_PATH):
+            with open(DataProvider.MESSAGE_STORAGE_PATH, "w"):
                 pass
-        with open(DataProvider.STORAGE_NAME, "r+") as openfile:
+        with open(DataProvider.MESSAGE_STORAGE_PATH, "r+") as openfile:
             try:
                 data = json.load(openfile)
             except:
@@ -52,7 +52,7 @@ class DataProvider:
 
     @staticmethod
     def save_messages(data):
-        with open(DataProvider.STORAGE_NAME, "w") as outfile:
+        with open(DataProvider.MESSAGE_STORAGE_PATH, "w") as outfile:
             json.dump(data, outfile)
 
     @staticmethod
