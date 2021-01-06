@@ -51,7 +51,7 @@ def submit_to_secondaries():
         current_retry_period = 10
         max_retry_period = 30
         message_id = str(uuid.uuid4())
-        stamp = Helper.encode_base64(datetime.utcnow())
+        stamp = Helper.encode_base64(str(datetime.utcnow()))
         url = f"{host}?message={message}&message_id={message_id}&stamp={stamp}"
         while True:
             try:
@@ -69,11 +69,11 @@ def submit_to_secondaries():
         async with aiohttp.ClientSession() as session:
             tasks = []
             for node in nodes:
-                if node.status != NodeStatus.Healthy:
+                if node['status'] != NodeStatus.Healthy:
                     continue
                 tasks.append(
                         asyncio.ensure_future(
-                            make_request(session, node.url, message)
+                            make_request(session, node['url'], message)
                         )
                     )
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -93,7 +93,7 @@ def submit_to_secondaries():
     nodes = DataProvider.get_health_statuses()
     nodes_counter = 0
     for node in nodes:
-        if node.status == NodeStatus.Healthy:
+        if node['status'] == NodeStatus.Healthy:
             nodes_counter += 1
     if nodes_counter == 0:
         return "master is read-only"
@@ -118,8 +118,8 @@ def health_check():
     while True:
         for node in nodes:
             try:
-                requests.get(node.url + "/health-check")
-                node.status = NodeStatus.Healthy
+                requests.get(node['url'] + "/health-check")
+                node['status'] = NodeStatus.Healthy
             except:
                 if node['status'] == NodeStatus.Healthy:
                     node['status'] = NodeStatus.Suspected
@@ -138,10 +138,10 @@ def notify():
     data = DataProvider.get_health_statuses()
     node_url = config.base_url + ":" + port
 
-    if any(node.url == node_url for node in data):
+    if any(node['url'] == node_url for node in data):
         for node in data:
-            if node.url == node_url:
-                node.status = NodeStatus.Healthy
+            if node['url'] == node_url:
+                node['status'] = NodeStatus.Healthy
     else:
         node = dict(url = node_url, status=NodeStatus.Healthy)
         data.append(node)

@@ -10,7 +10,6 @@ import time
 
 from datetime import datetime
 from data_access import DataProvider
-from models import Message
 from helpers import Helper
 from configs import master_node_url, base_url
 
@@ -29,8 +28,8 @@ def save_data():
 
     if text == None or uuid == None or stamp == None:
         return redirect("all", code=303)
-    stamp = datetime(Helper.decode_base64(stamp))
-    message = Message(text, uuid, stamp)
+    stamp = Helper.decode_base64(stamp)
+    message = dict(text = text, uuid= uuid, stamp = stamp)
     DataProvider.add_message(message)
     return jsonify(DataProvider.get_messages(), 200)
 
@@ -75,13 +74,16 @@ if __name__ == "__main__":
             result = try_port(init_port)
             if result != True:
                 continue
-            app.run("0.0.0.0", init_port, debug=True)
             break
+
+        app.run(debug=True, host="0.0.0.0", port=init_port, use_reloader=False)
     else:
         port = os.environ["PORT"]
-        app.run("0.0.0.0", port, debug=True)
+        app.run(debug=True, host="0.0.0.0", port=port, use_reloader=False)
     
     try:
         notify_master(init_port)
     except:
         pass
+
+    

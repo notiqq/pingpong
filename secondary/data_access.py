@@ -1,14 +1,8 @@
 import os as os
 import json
 from marshmallow import Schema, fields
+from datetime import datetime
 
-class MessageSchema(Schema):
-    message = fields.Str()
-    uuid = fields.Str()
-    stamp = fields.DateTime()
-
-
-#TODO serialization to json via marshmallow
 class DataProvider:
 
     STORAGE_NAME = "data.json"
@@ -34,10 +28,10 @@ class DataProvider:
     @staticmethod
     def add_message(message):
         messages = DataProvider.get_messages()
-        if message.uuid in messages:
-            old_message = messages[message.uuid]
-            if old_message.stamp > message.stamp:
-                messages[message.uuid] = message
+        if message['uuid'] in messages:
+            old_message = messages[message['uuid']]
+            if datetime(old_message['stamp']) > datetime(message['stamp']):
+                messages[message['uuid']] = message
 
         DataProvider.save_messages(messages)
         return messages
