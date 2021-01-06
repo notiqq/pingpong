@@ -50,9 +50,9 @@ def submit_to_secondaries():
         retry_period_step = 10
         current_retry_period = 10
         max_retry_period = 30
-        message_id = str(uuid.uuid4())
+        uuid_item = str(uuid.uuid4())
         stamp = Helper.encode_base64(str(datetime.utcnow()))
-        url = f"{host}?message={message}&message_id={message_id}&stamp={stamp}"
+        url = f"{host}?message={message}&uuid={uuid_item}&stamp={stamp}"
         while True:
             try:
                 async with session.get(url) as response:

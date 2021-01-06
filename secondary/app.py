@@ -8,6 +8,7 @@ import json
 import os as os
 import time
 
+from dateutil import parser
 from datetime import datetime
 from data_access import DataProvider
 from helpers import Helper
@@ -22,16 +23,16 @@ def save_data():
     delay = int(0 if "DELAY" not in os.environ else os.environ["DELAY"])
     time.sleep(delay)
 
-    text = request.args.get("message")
-    uuid = request.args.get("message_id")
+    message = request.args.get("message")
+    uuid = request.args.get("uuid")
     stamp = request.args.get("stamp")
 
-    if text == None or uuid == None or stamp == None:
+    if message == None or uuid == None or stamp == None:
         return redirect("all", code=303)
     stamp = Helper.decode_base64(stamp)
-    message = dict(text = text, uuid= uuid, stamp = stamp)
-    DataProvider.add_message(message)
-    return jsonify(DataProvider.get_messages(), 200)
+    message_dict = dict(message = message, uuid= uuid, stamp = stamp)
+    DataProvider.add_message(message_dict)
+    return ('', 200)
 
 
 @app.route("/health-check", methods=["GET"])
@@ -41,7 +42,10 @@ def get_health_check_data():
 @app.route("/all", methods=["GET"])
 def get_saved_data():
     data = DataProvider.get_messages()
-    sorted_data = sorted(data,key=lambda x: x.stamp, reverse=True)
+    for data_item in data:
+        datetime_stamp = parser.parse(data_item["stamp"])
+        dict(message = data_item['message'], uuid = data_item["uuid"], stamp =datetime_stamp)
+    sorted_data = sorted(data,key=lambda x: x['stamp'], reverse=True)
     return jsonify(sorted_data, 200)
 
 

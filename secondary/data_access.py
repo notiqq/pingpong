@@ -9,7 +9,7 @@ class DataProvider:
 
     @staticmethod
     def get_messages():
-        data = {}
+        data = []
         if not os.path.exists(DataProvider.STORAGE_NAME):
             with open(DataProvider.STORAGE_NAME, "w"):
                 pass
@@ -17,7 +17,7 @@ class DataProvider:
             try:
                 data = json.load(openfile)
             except:
-                data = {}
+                data = []
         return data
 
     @staticmethod
@@ -28,10 +28,14 @@ class DataProvider:
     @staticmethod
     def add_message(message):
         messages = DataProvider.get_messages()
-        if message['uuid'] in messages:
-            old_message = messages[message['uuid']]
-            if datetime(old_message['stamp']) > datetime(message['stamp']):
-                messages[message['uuid']] = message
+        if any(item['uuid'] == message['uuid'] for item in messages):
+            for index in range(len(messages)):
+                if messages[index]['uuid'] != message['uuid']:
+                    continue
+                if datetime(messages[index]['stamp']) > datetime(message['stamp']):
+                    messages[index]['stamp'] = message['stamp']
+        else:
+            messages.append(message)
 
         DataProvider.save_messages(messages)
         return messages
