@@ -24,7 +24,7 @@ class DataProvider:
             try:
                 data = json.load(openfile)
             except:
-                data = []
+                return []
         status_schema = StatusSchema(many=True)
         data = status_schema.loads(data)
         return data
@@ -61,3 +61,6 @@ class DataProvider:
         messages.append(message)
         DataProvider.save_messages(messages)
         return messages
+
+if __name__ == "__main__":
+    DataProvider.get_health_statuses()

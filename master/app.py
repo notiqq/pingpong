@@ -127,7 +127,7 @@ def health_check():
                     node['status'] = NodeStatus.Unhealthy
                 elif node['status'] == NodeStatus.Suspected:
                     node['status'] = NodeStatus.Unhealthy
-                print(node['url'], " ------ ", str(node['status']))
+                print(node['url'], " - ", node['status'], " - ", str(datetime.utcnow()))
             
         DataProvider.save_health_statuses(nodes)
         time.sleep(check_period)
@@ -146,7 +146,6 @@ def notify():
         node = dict(url = node_url, status=NodeStatus.Healthy)
         data.append(node)
     DataProvider.save_health_statuses(data)
-    print(node_url, " ------ ", str(NodeStatus.Healthy))
     return ('', 200)
       
 
