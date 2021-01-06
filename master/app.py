@@ -27,6 +27,12 @@ def get_config_data():
     data = config.base_url, config.first_node_url, config.second_node_url
     return jsonify(data)
 
+
+@app.route("/statuses", methods=["GET"])
+def get_statuses_data():
+    data = DataProvider.get_health_statuses()
+    return jsonify(data)
+
 @app.route("/all", methods=["GET"])
 def get_submitted_data():
     data = DataProvider.get_messages()
@@ -163,6 +169,7 @@ def notify():
       
 
 if __name__ == "__main__":
+    DataProvider.save_health_statuses([])
     process_value = Value('b', True)
     background_process = Process(target=health_check)
     background_process.start()  

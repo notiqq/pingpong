@@ -5,8 +5,13 @@ from datetime import datetime
 
 class DataProvider:
 
+    app_id = ""
     path = os.path.dirname(os.path.abspath(__file__))
-    MESSAGE_STORAGE_PATH = path + "/data.json"
+    MESSAGE_STORAGE_PATH = f"{path}/{app_id}data.json"
+
+    @staticmethod
+    def set_app_id(app_id):
+        DataProvider.MESSAGE_STORAGE_PATH = f"{DataProvider.path}/{app_id}data.json"
 
     @staticmethod
     def delete_messages_file():

@@ -1,1 +1,1 @@
-"[{\"status\": \"Unhealthy\", \"url\": \"http://localhost:5001\"}, {\"status\": \"Unhealthy\", \"url\": \"http://localhost:5002\"}]"
+"[{\"url\": \"http://localhost:5001\", \"status\": \"Suspected\"}, {\"url\": \"http://localhost:5002\", \"status\": \"Suspected\"}]"

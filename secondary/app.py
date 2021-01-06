@@ -51,6 +51,7 @@ def get_saved_data():
 
 @app.route("/clear", methods=["GET"])
 def clear_data():
+    DataProvider.delete_messages_file()
     DataProvider.save_messages([])
     return redirect("all", code=303)
 
@@ -87,15 +88,16 @@ if __name__ == "__main__":
             if result != True:
                 continue
             break
-
-        app.run(debug=True, host="0.0.0.0", port=init_port, use_reloader=False)
     else:
         init_port = os.environ["PORT"]
-        app.run(debug=True, host="0.0.0.0", port=init_port, use_reloader=False)
-    
+
+    DataProvider.set_app_id(init_port)
+
     try:
         notify_master(init_port)
     except:
         pass
+
+    app.run(debug=True, host="0.0.0.0", port=init_port, use_reloader=False)
 
     
