@@ -17,7 +17,7 @@ from multiprocessing import Process, Value
 
 from data_access import DataProvider
 from helpers import Helper
-from models import Node, NodeStatus
+from models import NodeStatus
 
 
 app = Flask(__name__)
@@ -112,7 +112,7 @@ def health_check():
     if len(nodes) == 0:
         nodes = []
         for node_url in node_urls:
-            node = Node(node_url, NodeStatus.NotDefined)
+            node = dict(url = node_url, status=NodeStatus.NotDefined)
             nodes.append(node)
 
     while True:
@@ -121,13 +121,13 @@ def health_check():
                 requests.get(node.url + "/health-check")
                 node.status = NodeStatus.Healthy
             except:
-                if node.status == NodeStatus.Healthy:
-                    node.status = NodeStatus.Suspected
-                elif node.status == NodeStatus.NotDefined:
-                    node.status = NodeStatus.Unhealthy
-                elif node.status == NodeStatus.Suspected:
-                    node.status = NodeStatus.Unhealthy
-                print(node.url, " ------ ", str(node.status))
+                if node['status'] == NodeStatus.Healthy:
+                    node['status'] = NodeStatus.Suspected
+                elif node['status'] == NodeStatus.NotDefined:
+                    node['status'] = NodeStatus.Unhealthy
+                elif node['status'] == NodeStatus.Suspected:
+                    node['status'] = NodeStatus.Unhealthy
+                print(node['url'], " ------ ", str(node['status']))
             
         DataProvider.save_health_statuses(nodes)
         time.sleep(check_period)
@@ -143,7 +143,7 @@ def notify():
             if node.url == node_url:
                 node.status = NodeStatus.Healthy
     else:
-        node = Node(node_url, NodeStatus.Healthy)
+        node = dict(url = node_url, status=NodeStatus.Healthy)
         data.append(node)
     DataProvider.save_health_statuses(data)
     print(node_url, " ------ ", str(NodeStatus.Healthy))
@@ -154,6 +154,6 @@ if __name__ == "__main__":
     process_value = Value('b', True)
     background_process = Process(target=health_check)
     background_process.start()  
-    app.run(debug=True, host="0.0.0.0", use_reloader=False)
+    app.run(debug=True, host="0.0.0.0", port=5000, use_reloader=False)
     background_process.join()
     

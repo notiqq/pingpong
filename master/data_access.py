@@ -1,6 +1,7 @@
 import os as os
 import json
 from marshmallow import Schema, fields
+from models import NodeStatus
 
 class StatusSchema(Schema):
     url = fields.Str()
@@ -24,6 +25,8 @@ class DataProvider:
                 data = json.load(openfile)
             except:
                 data = []
+        status_schema = StatusSchema(many=True)
+        data = status_schema.loads(data)
         return data
 
     @staticmethod
