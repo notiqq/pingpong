@@ -68,13 +68,16 @@ def submit_to_secondaries():
             try:
                 async with session.get(url) as response:
                     print("Read {0} from {1}".format(response.content_length, url))
-                return
+                return True
             except Exception as ex:
                 print(ex)
                 print("Reattempting...")
                 await asyncio.sleep(current_retry_period)
+                if current_retry_period == max_retry_period:
+                    return False
                 if current_retry_period < max_retry_period:
                     current_retry_period += retry_period_step
+        return False     
 
     async def process_requests(w, message, nodes):
         async with aiohttp.ClientSession() as session:
@@ -87,7 +90,11 @@ def submit_to_secondaries():
                             make_request(session, node['url'], message)
                         )
                     )
-            await asyncio.gather(*tasks, return_exceptions=True)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            count = len([item for item in results if item == True])
+            if count >= w:
+                return True
+            return False
 
     message = None
     timeout = 30
@@ -115,9 +122,10 @@ def submit_to_secondaries():
     DataProvider.add_message(message)
 
     asyncio.set_event_loop(asyncio.SelectorEventLoop())
-    asyncio.get_event_loop().run_until_complete(asyncio.wait_for(process_requests(w, message, nodes),timeout))
-
-    return jsonify({"status": f"Processed {message}"})
+    result = asyncio.get_event_loop().run_until_complete(asyncio.wait_for(process_requests(w, message, nodes),timeout))
+    if result == True:
+        return jsonify({"status": f"Processed"})
+    return jsonify({"status": f"Not enough nodes"})
 
 def get_nodes():
     node_urls = [config.first_node_url, config.second_node_url]
