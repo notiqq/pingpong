@@ -2,6 +2,7 @@ import os as os
 import json
 from marshmallow import Schema, fields
 from datetime import datetime
+from dateutil import parser
 
 class DataProvider:
 
@@ -43,7 +44,7 @@ class DataProvider:
             for index in range(len(messages)):
                 if messages[index]['uuid'] != message['uuid']:
                     continue
-                if datetime(messages[index]['stamp']) > datetime(message['stamp']):
+                if parser.parse(messages[index]['stamp']) > parser.parse(message['stamp']):
                     messages[index]['stamp'] = message['stamp']
         else:
             messages.append(message)
